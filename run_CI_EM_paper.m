@@ -1,9 +1,16 @@
+
+% Add fba toolbox utilities (find_cell called from there).
+script_path = mfilename('fullpath');
+git_dir =  script_path(1:regexp(script_path,'lcsb_confidence_intervals')-1);
+addpath(genpath(strcat(git_dir,'FBA_Toolboxes/utilities')))
+
+% load data and model
 load('./rawData/GLCptspp/case1.mat');
 load('MultiplXD1_MCAReadyFDP1.mat');
 
 % Create variables name tags and keep all samples. Could use less to make
 % run bit fasterto test.
-variables = MultiplXD1_MCAReadyFDP1.rxns([65:207 210:341]);
+variables = MultiplXD1_MCAReadyFDP1.rxns([65:207 210:341]); % enzymatic reactions
 case1 = samples(:,1:50000)'; % [samples x vars]
 
 % Preprocessing to remove zero variance variables that are 0 in this case.
@@ -44,7 +51,7 @@ tExact = toc(startExact);
 % "t-statistic" is computed from the provided data to estiamte the CIs via
 % resampling from the data with replacement. 
 startBoot = tic;
-CIagg.boot=get_CI_bootstrap_tail(case1,500); %25000 in paper.
+CIagg.boot=get_CI_bootstrap_tail(case1,5000); %25000 in paper.
 tBoot = toc(startBoot);
 
 % data mean
@@ -107,8 +114,8 @@ set(gca,'fontweight','bold')
 
 legend('T-test','Bonferroni','Exact normal','Bootstrap')
 
-%% Case studiy: here is an example for applying the three statistical methods 
-% for constructing CIs when comparing diffferent FDPs.
+%% Case studiy: applying the three statistical methods 
+% for constructing CIs when comparing 4 diffferent FDPs.
 % We select top 7 enzymes per case and take the union of these top enzymes for study.
 
 % Load the model again to fetch variable names
@@ -136,16 +143,16 @@ noTopVar=7;
 tol=10^-9;
 for i=1:4
     % evaluate eache case to get significant variables
-    eval(['index=std(case',num2str(i),')>tol;'])
+    eval(['index=std(case',num2str(i),')>tol;']) % consider ones that present variance larger than tolerance...
     eval(['dat = case',num2str(i),'(:,index);'])
 
     m_vec = mean(dat); % get means
     
     [~,m_vec_order]=sort(abs(m_vec),'descend'); % order abs means
     
-    CI_temp=get_CI_bootstrap_tail(dat,500); % get CI from bootstrap
-    
-    %CI_temp=get_CI_exactNormal(dat); % get CI from bootstrap
+    % Could use other methods too but bootsrapping appears to be most
+    % adequate for non-normal distributions
+    CI_temp=get_CI_bootstrap_tail(dat,5000); % get CI from bootstrap (25000 in paper)
     
     Low=CI_temp(1,:);
     Upp=CI_temp(2,:);
@@ -153,24 +160,24 @@ for i=1:4
     % find significant FCCs
     isSignif=[Upp(m_vec_order)<0 | Low(m_vec_order)>0];
     
+    % update variable names as we remove below tolerance variables
     dat_vars=variables(index);
     sort_vars=dat_vars(m_vec_order);
     sig_vars=sort_vars(isSignif);
     
     eval(['topVars.case',num2str(i),'=sig_vars(1:noTopVar);'])
 end
-% THis is how we get our top cadidatesusing the bootsrapping approach. 
+% THis is how we get our top candidatesusing the bootsrapping approach. 
 varList=[topVars.case1;topVars.case2;topVars.case3;topVars.case4];
 varList=unique(varList);
 
 %% Bonferroni test for all cases
 
-% addpath for find_cell
-addpath(genpath('/Users/tuure/GIT_Folder/FBA_Toolboxes/Utilities'))
+% lovate variables
 locVars=find_cell(varList,variables);
 % Perform ttest for each case with bonferroni correction
 alpha=0.05;
-pairCases=nchoosek(1:4,2);
+pairCases=nchoosek(1:4,2); % combinations of FDP comparisons
 ntest=size(pairCases,1)*numel(varList);
 allCases=[];
 figure;
@@ -182,14 +189,16 @@ for pairNum=1:size(pairCases,1)
    for varNum=1:numel(varList)
       eval(['tempX=case',num2str(pairCases(pairNum,1)),'(:,locVars(varNum));'])
       eval(['tempY=case',num2str(pairCases(pairNum,2)),'(:,locVars(varNum));'])
-      [H,P,CI,STATS]=ttest(tempX',tempY','alpha',alpha/ntest);
-      le_string=[varList{varNum},': C',num2str(pairCases(pairNum,1)),'-C',num2str(pairCases(pairNum,2))];
-      estimate=mean(tempX)-mean(tempY);
+      [H,P,CI,STATS]=ttest(tempX',tempY','alpha',alpha/ntest); % Note we divide by total number of test we compare overall (6 pairs * 15 vars)
+      le_string=[varList{varNum},': C',num2str(pairCases(pairNum,1)),'-C',num2str(pairCases(pairNum,2))]; % Names of comparisons
+      estimate=mean(tempX)-mean(tempY); %diff means
+      % Collect data as we loop through the cse comparisons
       allCases=[allCases;[{le_string},{estimate},{CI(1)},{CI(2)},{P}]];
       tempCI=[tempCI;CI];
       tempEst=[tempEst;estimate];
       myDiffs = [myDiffs tempX-tempY];
    end
+   % Plot of comparisons pairwise
    subplot(3,2,pairNum)
    errorbar(1:numel(tempEst),tempEst,tempCI(:,1)-tempEst...
        ,tempEst-tempCI(:,2),'dk','MarkerFaceColor','k','MarkerSize',8,'LineWidth',1.5);
@@ -206,13 +215,10 @@ for pairNum=1:size(pairCases,1)
    allCIs=[allCIs;tempCI];
 end
 
-% get_CI_bonferroni(myDiffs)
-% 1.8880e+06 samples for 0.1 EM
-
 %% Normal exact testing
 
 % Get variance matrices and the means and std of the cases
-Smat=zeros(4*numel(locVars));
+Smat=zeros(4*numel(locVars)); %getting the variance matrix
 vecMean=[];
 vecSTD=[];
 for caseNo=1:4
@@ -225,7 +231,7 @@ for caseNo=1:4
     tempSTD=std(tempData);
     vecSTD=[vecSTD,tempSTD];
 end
-Smean=Smat/noSamples; % CHECK THISIS RIGHT n = noSamples
+Smean=Smat/noSamples; 
 
 % Generate the covariance matrix for the case comparisons
 pairCases=nchoosek(1:4,2);
@@ -245,12 +251,12 @@ Cont_var=K*Smean*transpose(K);
 [Gamma,~] = corrcov(Cont_var);
 
 nsimu=noSamples; % number of simulations
-Zsimu = mvnrnd(zeros(ntest,1),Gamma,nsimu);% simulate Z nsimu times DOUBLE CHECK THIS FUCNTION
+Zsimu = mvnrnd(zeros(ntest,1),Gamma,nsimu);% simulate Z nsimu times
 absmax = max(abs(Zsimu)'); %compute max_j |Z_j|
 q_alpha=quantile(absmax,1-alpha); 
 
-Low = Cont_est - q_alpha*sqrt(diag(Cont_var)); % We don't divide by n here as we did it earlier Smean = Smat/n !!!!!!!!
-Upp = Cont_est + q_alpha*sqrt(diag(Cont_var)); % MAKE SURE TO BE CONSISTENT IN THE WRITING OF TEXT !!!
+Low = Cont_est - q_alpha*sqrt(diag(Cont_var)); % We don't divide by n here as we did it earlier Smean = Smat/noSamples !!!!!!!!
+Upp = Cont_est + q_alpha*sqrt(diag(Cont_var)); 
 
 figure
 for pairNum=1:size(pairCases,1)
@@ -301,7 +307,7 @@ Boot_est=K*vecMean';
 Boot_SD=sqrt(0.5*abs(K)*[vecSTD.^2]');
 
 % Bootstrap samples
-nR = 500;
+nR = 5000; % 25000 used in paper
 t_stat = zeros(nR,ntest);
 for i = 1:nR
     % Sampling with replacement

@@ -31,6 +31,13 @@ h_max=max(abs(h_boot-0.5)'); %take abs here instead
 
 q_alpha=quantile(h_max,1-alpha);
 beta = 1-2*q_alpha;
+% With beta = 0.0004, for nR= 5'000, the bootstrap will only provide
+% 5000*0.0004 (ie 2 points) to estimate u and l. Runt time around several
+% minutes.
+% With beta = 0.00056, for nR= 25'000, the bootstrap provide 25000*0.00055
+% (ie ~14 points) to estimate u and l. Run time roughly 40 min....
+% As rule of thumb it would be good to have at least 10 points and ideally
+% more. 
 
 u_vec=quantile(t_stat,1-beta/2,1);
 l_vec=quantile(t_stat,beta/2,1); % Top values become negative....
