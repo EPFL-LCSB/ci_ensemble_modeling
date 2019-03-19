@@ -20,8 +20,8 @@ end
 data_mean=mean(data);
 
 Smat=cov(data); % covariance matrix
-Gamma=corrcoef(data); % correlation amtrix
-Zsimu = mvnrnd(zeros(p,1),Gamma,nsimu);% simulate Z nsimu times DOUBLE CHECK THIS FUCNTION
+Gamma=corrcoef(data); % correlation matrix
+Zsimu = mvnrnd(zeros(p,1),Gamma,nsimu);% simulate Z nsimu times
 absmax = max(abs(Zsimu)'); %compute max_j |Z_j|
 q_alpha=quantile(absmax,1-alpha); 
 
