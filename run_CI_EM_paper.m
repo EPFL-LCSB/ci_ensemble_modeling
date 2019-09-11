@@ -1,30 +1,42 @@
+<<<<<<< Updated upstream
+=======
+
+% Set the random seed
+RandStream.setGlobalStream(RandStream('mt19937ar','seed',2011));
+
+% load data and model
+>>>>>>> Stashed changes
 load('./rawData/GLCptspp/case1.mat');
-load('MultiplXD1_MCAReadyFDP1.mat');
+load('Enzymes.mat');
 
 % Create variables name tags and keep all samples. Could use less to make
 % run bit fasterto test.
+<<<<<<< Updated upstream
 variables = MultiplXD1_MCAReadyFDP1.rxns([65:207 210:341]);
+=======
+variables = Enzymes; % enzymatic reactions
+>>>>>>> Stashed changes
 case1 = samples(:,1:50000)'; % [samples x vars]
 
 % Preprocessing to remove zero variance variables that are 0 in this case.
 % We do this as we need as semipositive matrix to run the exact normal
-% method. 
+% method.
 tol=10^-9;
 index=std(case1)>tol;
 variables=variables(index);
 case1=case1(:,index);
 
 % clear variables not required
-clear MultiplXD1_MCAReadyFDP1 samples
+clear Enzymes samples
 
 CIagg=[];
 % traditional "errorbars" showing the quartiles of distribution
 CIagg.oracle = quantile(case1,[.25 .75]);
 
-% Classical univariate confidence intervals (CI) without any correction for 
-% simulataneous comparison. 95% confidence level. 
+% Classical univariate confidence intervals (CI) without any correction for
+% simulataneous comparison. 95% confidence level.
 % Note: with multiple variables the t-distribution tends towards the normal
-% distribution. 
+% distribution.
 CIagg.ttest=get_CI_t_test(case1);
 
 % Bonferroni correction of the t-test CIs for simultaneous testing.
@@ -42,9 +54,13 @@ tExact = toc(startExact);
 % Bootstrappping approach for constructing CIs. We do not rely on normality
 % assumption anymore as the CIs are built around a "pivot". A pseudo
 % "t-statistic" is computed from the provided data to estiamte the CIs via
-% resampling from the data with replacement. 
+% resampling from the data with replacement.
 startBoot = tic;
+<<<<<<< Updated upstream
 CIagg.boot=get_CI_bootstrap_tail(case1,500); %25000 in paper.
+=======
+CIagg.boot=get_CI_bootstrap_tail(case1,25000); %25000 in paper.
+>>>>>>> Stashed changes
 tBoot = toc(startBoot);
 
 % data mean
@@ -66,12 +82,12 @@ top_ID = m_vec_order(1:numTops);
 % Compare the three methods
 figure
 errorbar([1:3:numTops*3],data_mean(top_ID),data_mean(top_ID)-CIagg.bonf(1,top_ID)...
-    ,CIagg.bonf(2,top_ID)-data_mean(top_ID),'db','MarkerFaceColor','b','MarkerSize',8,'LineWidth',1.5); 
+    ,CIagg.bonf(2,top_ID)-data_mean(top_ID),'db','MarkerFaceColor','b','MarkerSize',8,'LineWidth',1.5);
 hold on
 errorbar([2:3:numTops*3],data_mean(top_ID),data_mean(top_ID)-CIagg.norm(1,top_ID)...
-    ,CIagg.norm(2,top_ID)-data_mean(top_ID),'dr','MarkerFaceColor','r','MarkerSize',8,'LineWidth',1.5); 
+    ,CIagg.norm(2,top_ID)-data_mean(top_ID),'dr','MarkerFaceColor','r','MarkerSize',8,'LineWidth',1.5);
 errorbar([3:3:numTops*3],data_mean(top_ID),data_mean(top_ID)-CIagg.boot(1,top_ID)...
-    ,CIagg.boot(2,top_ID)-data_mean(top_ID),'dk','MarkerFaceColor','k','MarkerSize',8,'LineWidth',1.5); 
+    ,CIagg.boot(2,top_ID)-data_mean(top_ID),'dk','MarkerFaceColor','k','MarkerSize',8,'LineWidth',1.5);
 grid on;
 
 set(gca,'XTick',[2:3:numTops*3])
@@ -87,14 +103,14 @@ legend('Bonferroni','Exact normal','Bootstrap')
 % Alternative plot - compare the three methods to the t-test no correction
 figure
 errorbar([1:4:numTops*4],data_mean(top_ID),data_mean(top_ID)-CIagg.ttest(1,top_ID)...
-    ,CIagg.ttest(2,top_ID)-data_mean(top_ID),'dm','MarkerFaceColor','m','MarkerSize',8,'LineWidth',1.5); 
+    ,CIagg.ttest(2,top_ID)-data_mean(top_ID),'dm','MarkerFaceColor','m','MarkerSize',8,'LineWidth',1.5);
 hold on
 errorbar([2:4:numTops*4],data_mean(top_ID),data_mean(top_ID)-CIagg.bonf(1,top_ID)...
-    ,CIagg.bonf(2,top_ID)-data_mean(top_ID),'db','MarkerFaceColor','b','MarkerSize',8,'LineWidth',1.5); 
+    ,CIagg.bonf(2,top_ID)-data_mean(top_ID),'db','MarkerFaceColor','b','MarkerSize',8,'LineWidth',1.5);
 errorbar([3:4:numTops*4],data_mean(top_ID),data_mean(top_ID)-CIagg.norm(1,top_ID)...
-    ,CIagg.norm(2,top_ID)-data_mean(top_ID),'dr','MarkerFaceColor','r','MarkerSize',8,'LineWidth',1.5); 
+    ,CIagg.norm(2,top_ID)-data_mean(top_ID),'dr','MarkerFaceColor','r','MarkerSize',8,'LineWidth',1.5);
 errorbar([4:4:numTops*4],data_mean(top_ID),data_mean(top_ID)-CIagg.boot(1,top_ID)...
-    ,CIagg.boot(2,top_ID)-data_mean(top_ID),'dk','MarkerFaceColor','k','MarkerSize',8,'LineWidth',1.5); 
+    ,CIagg.boot(2,top_ID)-data_mean(top_ID),'dk','MarkerFaceColor','k','MarkerSize',8,'LineWidth',1.5);
 grid on;
 
 set(gca,'XTick',[2.5:4:numTops*4])
@@ -105,17 +121,22 @@ ylabel('Means and CIs')
 set(gca,'fontsize',22)
 set(gca,'fontweight','bold')
 
-legend('T-test','Bonferroni','Exact normal','Bootstrap')
+legend('Univariate','Bonferroni','Exact normal','Bootstrap')
 
+<<<<<<< Updated upstream
 %% Case studiy: here is an example for applying the three statistical methods 
 % for constructing CIs when comparing diffferent FDPs.
+=======
+%% Case studiy: applying the three statistical methods
+% for constructing CIs when comparing 4 diffferent FDPs.
+>>>>>>> Stashed changes
 % We select top 7 enzymes per case and take the union of these top enzymes for study.
 
 % Load the model again to fetch variable names
-load('MultiplXD1_MCAReadyFDP1.mat');
+load('Enzymes.mat');
 
 % Create variables name tags and keep 50k samples.
-variables = MultiplXD1_MCAReadyFDP1.rxns([65:207 210:341]);
+variables = Enzymes;
 noSamples=50000;
 load('./rawData/GLCptspp/case1.mat');
 case1 = samples(:,1:noSamples)'; % [samples x vars]
@@ -127,7 +148,7 @@ load('./rawData/GLCptspp/case4.mat');
 case4 = samples(:,1:noSamples)'; % [samples x vars]
 
 % clear variables not required
-clear MultiplXD1_MCAReadyFDP1 samples
+clear Enzymes samples
 
 % Find top variables using the bootstrapping approach. We hfavour this
 % method as the distribution of control coefficients are generally not very
@@ -138,14 +159,20 @@ for i=1:4
     % evaluate eache case to get significant variables
     eval(['index=std(case',num2str(i),')>tol;'])
     eval(['dat = case',num2str(i),'(:,index);'])
-
+    
     m_vec = mean(dat); % get means
     
     [~,m_vec_order]=sort(abs(m_vec),'descend'); % order abs means
     
+<<<<<<< Updated upstream
     CI_temp=get_CI_bootstrap_tail(dat,500); % get CI from bootstrap
     
     %CI_temp=get_CI_exactNormal(dat); % get CI from bootstrap
+=======
+    % Could use other methods too but bootsrapping appears to be most
+    % adequate for non-normal distributions
+    CI_temp=get_CI_bootstrap_tail(dat,25000); % get CI from bootstrap (25000 in paper)
+>>>>>>> Stashed changes
     
     Low=CI_temp(1,:);
     Upp=CI_temp(2,:);
@@ -159,14 +186,31 @@ for i=1:4
     
     eval(['topVars.case',num2str(i),'=sig_vars(1:noTopVar);'])
 end
+<<<<<<< Updated upstream
 % THis is how we get our top cadidatesusing the bootsrapping approach. 
+=======
+% THis is how we get our top candidatesusing the bootsrapping approach.
+>>>>>>> Stashed changes
 varList=[topVars.case1;topVars.case2;topVars.case3;topVars.case4];
 varList=unique(varList);
 
 %% Bonferroni test for all cases
 
+<<<<<<< Updated upstream
 % addpath for find_cell
 addpath(genpath('/Users/tuure/GIT_Folder/FBA_Toolboxes/Utilities'))
+=======
+% Reorder variables according to magnitude in mean difference of case 1&2
+% to help reading of the results
+locVars=find_cell(varList,variables);
+
+mC1=mean(case1(:,locVars));
+mC2=mean(case2(:,locVars));
+[~,idSortVarlist]=sort(abs(mC1-mC2),'descend');
+varList=varList(idSortVarlist);
+
+% lovate variables
+>>>>>>> Stashed changes
 locVars=find_cell(varList,variables);
 % Perform ttest for each case with bonferroni correction
 alpha=0.05;
@@ -179,6 +223,7 @@ myDiffs=[];
 for pairNum=1:size(pairCases,1)
     tempCI=[];
     tempEst=[];
+<<<<<<< Updated upstream
    for varNum=1:numel(varList)
       eval(['tempX=case',num2str(pairCases(pairNum,1)),'(:,locVars(varNum));'])
       eval(['tempY=case',num2str(pairCases(pairNum,2)),'(:,locVars(varNum));'])
@@ -204,6 +249,40 @@ for pairNum=1:size(pairCases,1)
    set(gca,'fontweight','bold')
    grid on
    allCIs=[allCIs;tempCI];
+=======
+    for varNum=1:numel(varList)
+        eval(['tempX=case',num2str(pairCases(pairNum,1)),'(:,locVars(varNum));'])
+        eval(['tempY=case',num2str(pairCases(pairNum,2)),'(:,locVars(varNum));'])
+        [H,P,CI,STATS]=ttest(tempX',tempY','alpha',alpha/ntest); % Note we divide by total number of test we compare overall (6 pairs * 15 vars)
+        le_string=[varList{varNum},': C',num2str(pairCases(pairNum,1)),'-C',num2str(pairCases(pairNum,2))]; % Names of comparisons
+        estimate=mean(tempX)-mean(tempY); %diff means
+        % Collect data as we loop through the cse comparisons
+        allCases=[allCases;[{le_string},{estimate},{CI(1)},{CI(2)},{P}]];
+        tempCI=[tempCI;CI];
+        tempEst=[tempEst;estimate];
+        myDiffs = [myDiffs tempX-tempY];
+    end
+    % Plot of comparisons pairwise
+    subplot(3,2,pairNum)
+    isSignif=0<tempCI(:,1)|0>tempCI(:,2);
+    idSig=find(isSignif);
+    idNotSig=find(~isSignif);
+    errorbar(idSig,tempEst(idSig),tempCI(idSig,1)-tempEst(idSig)...
+        ,tempEst(idSig)-tempCI(idSig,2),'dr','MarkerFaceColor','r','MarkerSize',8,'LineWidth',2);
+    hold on
+    errorbar(idNotSig,tempEst(idNotSig),tempCI(idNotSig,1)-tempEst(idNotSig)...
+        ,tempEst(idNotSig)-tempCI(idNotSig,2),'db','MarkerFaceColor','w','MarkerSize',8,'LineWidth',2);
+    ylabel('Bonferroni CIs')
+    title(['C',num2str(pairCases(pairNum,1)),'-C',num2str(pairCases(pairNum,2))])
+    set(gca,'XTick',1:numel(varList))
+    set(gca,'XTickLabel',varList)
+    set(gca,'XTickLabelRotation',60)
+    plot(xlim,[0 0],'--k')
+    set(gca,'fontsize',22)
+    set(gca,'fontweight','bold')
+    grid on
+    allCIs=[allCIs;tempCI];
+>>>>>>> Stashed changes
 end
 
 % get_CI_bonferroni(myDiffs)
@@ -225,7 +304,11 @@ for caseNo=1:4
     tempSTD=std(tempData);
     vecSTD=[vecSTD,tempSTD];
 end
+<<<<<<< Updated upstream
 Smean=Smat/noSamples; % CHECK THISIS RIGHT n = noSamples
+=======
+Smean=Smat/noSamples;
+>>>>>>> Stashed changes
 
 % Generate the covariance matrix for the case comparisons
 pairCases=nchoosek(1:4,2);
@@ -233,11 +316,11 @@ ntest=size(pairCases,1)*numel(varList);
 K=zeros(ntest,4*numel(varList));
 countTests=0;
 for pairNum=1:size(pairCases,1)
-   for varNum=1:numel(varList)
-       countTests=countTests+1;
-       K(countTests,(pairCases(pairNum,1)-1)*numel(varList)+varNum)=1;
-       K(countTests,(pairCases(pairNum,2)-1)*numel(varList)+varNum)=-1;
-   end
+    for varNum=1:numel(varList)
+        countTests=countTests+1;
+        K(countTests,(pairCases(pairNum,1)-1)*numel(varList)+varNum)=1;
+        K(countTests,(pairCases(pairNum,2)-1)*numel(varList)+varNum)=-1;
+    end
 end
 Cont_est=K*vecMean';
 Cont_var=K*Smean*transpose(K);
@@ -247,10 +330,15 @@ Cont_var=K*Smean*transpose(K);
 nsimu=noSamples; % number of simulations
 Zsimu = mvnrnd(zeros(ntest,1),Gamma,nsimu);% simulate Z nsimu times DOUBLE CHECK THIS FUCNTION
 absmax = max(abs(Zsimu)'); %compute max_j |Z_j|
-q_alpha=quantile(absmax,1-alpha); 
+q_alpha=quantile(absmax,1-alpha);
 
+<<<<<<< Updated upstream
 Low = Cont_est - q_alpha*sqrt(diag(Cont_var)); % We don't divide by n here as we did it earlier Smean = Smat/n !!!!!!!!
 Upp = Cont_est + q_alpha*sqrt(diag(Cont_var)); % MAKE SURE TO BE CONSISTENT IN THE WRITING OF TEXT !!!
+=======
+Low = Cont_est - q_alpha*sqrt(diag(Cont_var)); % We don't divide by n here as we did it earlier Smean = Smat/noSamples !!!!!!!!
+Upp = Cont_est + q_alpha*sqrt(diag(Cont_var));
+>>>>>>> Stashed changes
 
 figure
 for pairNum=1:size(pairCases,1)
@@ -258,19 +346,24 @@ for pairNum=1:size(pairCases,1)
     tempCI=[Low((pairNum-1)*numel(locVars)+1:numel(locVars)*pairNum),...
         Upp((pairNum-1)*numel(locVars)+1:numel(locVars)*pairNum)];
     
-   subplot(3,2,pairNum)
-   errorbar(1:numel(tempEst),tempEst,tempCI(:,1)-tempEst...
-       ,tempEst-tempCI(:,2),'dk','MarkerFaceColor','k','MarkerSize',8,'LineWidth',1.5);
-   ylabel('Exact Normal CIs')
-   title(['C',num2str(pairCases(pairNum,1)),'-C',num2str(pairCases(pairNum,2))])
-   set(gca,'XTick',1:numel(varList))
-   set(gca,'XTickLabel',varList)
-   set(gca,'XTickLabelRotation',60)
-   hold on
-   plot(xlim,[0 0],'--k')
-   set(gca,'fontsize',22)
-   set(gca,'fontweight','bold')
-   grid on
+    subplot(3,2,pairNum)
+    isSignif=0<tempCI(:,1)|0>tempCI(:,2);
+    idSig=find(isSignif);
+    idNotSig=find(~isSignif);
+    errorbar(idSig,tempEst(idSig),tempCI(idSig,1)-tempEst(idSig)...
+        ,tempEst(idSig)-tempCI(idSig,2),'dr','MarkerFaceColor','r','MarkerSize',8,'LineWidth',2);
+    hold on
+    errorbar(idNotSig,tempEst(idNotSig),tempCI(idNotSig,1)-tempEst(idNotSig)...
+        ,tempEst(idNotSig)-tempCI(idNotSig,2),'db','MarkerFaceColor','w','MarkerSize',8,'LineWidth',2);
+    ylabel('Exact Normal CIs')
+    title(['C',num2str(pairCases(pairNum,1)),'-C',num2str(pairCases(pairNum,2))])
+    set(gca,'XTick',1:numel(varList))
+    set(gca,'XTickLabel',varList)
+    set(gca,'XTickLabelRotation',60)
+    plot(xlim,[0 0],'--k')
+    set(gca,'fontsize',22)
+    set(gca,'fontweight','bold')
+    grid on
 end
 
 %% Bootstrap with tail balancing
@@ -281,11 +374,11 @@ ntest=size(pairCases,1)*numel(varList);
 K=zeros(ntest,4*numel(varList));
 countTests=0;
 for pairNum=1:size(pairCases,1)
-   for varNum=1:numel(varList)
-       countTests=countTests+1;
-       K(countTests,(pairCases(pairNum,1)-1)*numel(varList)+varNum)=1;
-       K(countTests,(pairCases(pairNum,2)-1)*numel(varList)+varNum)=-1;
-   end
+    for varNum=1:numel(varList)
+        countTests=countTests+1;
+        K(countTests,(pairCases(pairNum,1)-1)*numel(varList)+varNum)=1;
+        K(countTests,(pairCases(pairNum,2)-1)*numel(varList)+varNum)=-1;
+    end
 end
 vecMean=[];
 vecSTD=[];
@@ -301,7 +394,11 @@ Boot_est=K*vecMean';
 Boot_SD=sqrt(0.5*abs(K)*[vecSTD.^2]');
 
 % Bootstrap samples
+<<<<<<< Updated upstream
 nR = 500;
+=======
+nR = 25000; % 25000 used in paper
+>>>>>>> Stashed changes
 t_stat = zeros(nR,ntest);
 for i = 1:nR
     % Sampling with replacement
@@ -332,19 +429,78 @@ for pairNum=1:size(pairCases,1)
     tempEst=Boot_est((pairNum-1)*numel(locVars)+1:numel(locVars)*pairNum);
     tempCI=[Low_tail((pairNum-1)*numel(locVars)+1:numel(locVars)*pairNum),...
         Upp_tail((pairNum-1)*numel(locVars)+1:numel(locVars)*pairNum)];
-   subplot(3,2,pairNum)
-   errorbar(1:numel(tempEst),tempEst,tempEst-tempCI(:,1)...
-       ,tempCI(:,2)-tempEst,'dk','MarkerFaceColor','k','MarkerSize',8,'LineWidth',1.5);
-   ylabel('Bootstrap tail balance CIs')
-   title(['C',num2str(pairCases(pairNum,1)),'-C',num2str(pairCases(pairNum,2))])
-   set(gca,'XTick',1:numel(varList))
-   set(gca,'XTickLabel',varList)
-   set(gca,'XTickLabelRotation',60)
-   hold on
-   plot(xlim,[0 0],'--k')
-   set(gca,'fontsize',22)
-   set(gca,'fontweight','bold')
-   grid on
+    subplot(3,2,pairNum)
+    errorbar(1:numel(tempEst),tempEst,tempEst-tempCI(:,1)...
+        ,tempCI(:,2)-tempEst,'dk','MarkerFaceColor','k','MarkerSize',8,'LineWidth',1.5);
+    isSignif=0<tempCI(:,1)|0>tempCI(:,2);
+    idSig=find(isSignif);
+    idNotSig=find(~isSignif);
+    errorbar(idSig,tempEst(idSig),tempEst(idSig)-tempCI(idSig,1)...
+        ,tempCI(idSig,2)-tempEst(idSig),'dr','MarkerFaceColor','r','MarkerSize',8,'LineWidth',2);
+    hold on
+    errorbar(idNotSig,tempEst(idNotSig),tempEst(idNotSig)-tempCI(idNotSig,1)...
+        ,tempCI(idNotSig,2)-tempEst(idNotSig),'db','MarkerFaceColor','w','MarkerSize',8,'LineWidth',2);
+    ylabel('Bootstrap tail balance CIs')
+    title(['C',num2str(pairCases(pairNum,1)),'-C',num2str(pairCases(pairNum,2))])
+    set(gca,'XTick',1:numel(varList))
+    set(gca,'XTickLabel',varList)
+    set(gca,'XTickLabelRotation',60)
+    hold on
+    plot(xlim,[0 0],'--k')
+    set(gca,'fontsize',22)
+    set(gca,'fontweight','bold')
+    grid on
+end
+
+%% Univariate test for all cases to show differences
+
+% lovate variables
+locVars=find_cell(varList,variables);
+% Perform ttest for each case with univariate method
+alpha=0.05;
+pairCases=nchoosek(1:4,2); % combinations of FDP comparisons
+ntest=size(pairCases,1)*numel(varList);
+allCases=[];
+figure;
+allCIs=[];
+myDiffs=[];
+for pairNum=1:size(pairCases,1)
+    tempCI=[];
+    tempEst=[];
+    for varNum=1:numel(varList)
+        eval(['tempX=case',num2str(pairCases(pairNum,1)),'(:,locVars(varNum));'])
+        eval(['tempY=case',num2str(pairCases(pairNum,2)),'(:,locVars(varNum));'])
+        le_string=[varList{varNum},': C',num2str(pairCases(pairNum,1)),'-C',num2str(pairCases(pairNum,2))]; % Names of comparisons
+        estimate=mean(tempX-tempY); %mean of differences
+        n=numel(tempX);
+        CI = repmat(estimate,2,1) + [-1; 1]*tinv(1-alpha/2,n-1)*[std(tempX-tempY)/sqrt(n)];
+        
+        % Collect data as we loop through the case comparisons
+        allCases=[allCases;[{le_string},{estimate},{CI(1)},{CI(2)},{P}]];
+        tempCI=[tempCI;CI'];
+        tempEst=[tempEst;estimate];
+        myDiffs = [myDiffs tempX-tempY];
+    end
+    % Plot of comparisons pairwise
+    subplot(3,2,pairNum)
+    isSignif=0<tempCI(:,1)|0>tempCI(:,2);
+    idSig=find(isSignif);
+    idNotSig=find(~isSignif);
+    errorbar(idSig,tempEst(idSig),tempCI(idSig,1)-tempEst(idSig)...
+        ,tempEst(idSig)-tempCI(idSig,2),'dr','MarkerFaceColor','r','MarkerSize',8,'LineWidth',2);
+    hold on
+    errorbar(idNotSig,tempEst(idNotSig),tempCI(idNotSig,1)-tempEst(idNotSig)...
+        ,tempEst(idNotSig)-tempCI(idNotSig,2),'db','MarkerFaceColor','w','MarkerSize',8,'LineWidth',2);
+    ylabel('Univariate CIs')
+    title(['C',num2str(pairCases(pairNum,1)),'-C',num2str(pairCases(pairNum,2))])
+    set(gca,'XTick',1:numel(varList))
+    set(gca,'XTickLabel',varList)
+    set(gca,'XTickLabelRotation',60)
+    plot(xlim,[0 0],'--k')
+    set(gca,'fontsize',22)
+    set(gca,'fontweight','bold')
+    grid on
+    allCIs=[allCIs;tempCI];
 end
 
 % h = get(0,'children');
