@@ -1,21 +1,14 @@
-<<<<<<< Updated upstream
-=======
 
 % Set the random seed
 RandStream.setGlobalStream(RandStream('mt19937ar','seed',2011));
 
 % load data and model
->>>>>>> Stashed changes
 load('./rawData/GLCptspp/case1.mat');
 load('Enzymes.mat');
 
 % Create variables name tags and keep all samples. Could use less to make
 % run bit fasterto test.
-<<<<<<< Updated upstream
-variables = MultiplXD1_MCAReadyFDP1.rxns([65:207 210:341]);
-=======
 variables = Enzymes; % enzymatic reactions
->>>>>>> Stashed changes
 case1 = samples(:,1:50000)'; % [samples x vars]
 
 % Preprocessing to remove zero variance variables that are 0 in this case.
@@ -56,11 +49,7 @@ tExact = toc(startExact);
 % "t-statistic" is computed from the provided data to estiamte the CIs via
 % resampling from the data with replacement.
 startBoot = tic;
-<<<<<<< Updated upstream
-CIagg.boot=get_CI_bootstrap_tail(case1,500); %25000 in paper.
-=======
 CIagg.boot=get_CI_bootstrap_tail(case1,25000); %25000 in paper.
->>>>>>> Stashed changes
 tBoot = toc(startBoot);
 
 % data mean
@@ -123,13 +112,9 @@ set(gca,'fontweight','bold')
 
 legend('Univariate','Bonferroni','Exact normal','Bootstrap')
 
-<<<<<<< Updated upstream
-%% Case studiy: here is an example for applying the three statistical methods 
-% for constructing CIs when comparing diffferent FDPs.
-=======
+
 %% Case studiy: applying the three statistical methods
 % for constructing CIs when comparing 4 diffferent FDPs.
->>>>>>> Stashed changes
 % We select top 7 enzymes per case and take the union of these top enzymes for study.
 
 % Load the model again to fetch variable names
@@ -164,15 +149,9 @@ for i=1:4
     
     [~,m_vec_order]=sort(abs(m_vec),'descend'); % order abs means
     
-<<<<<<< Updated upstream
-    CI_temp=get_CI_bootstrap_tail(dat,500); % get CI from bootstrap
-    
-    %CI_temp=get_CI_exactNormal(dat); % get CI from bootstrap
-=======
     % Could use other methods too but bootsrapping appears to be most
     % adequate for non-normal distributions
     CI_temp=get_CI_bootstrap_tail(dat,25000); % get CI from bootstrap (25000 in paper)
->>>>>>> Stashed changes
     
     Low=CI_temp(1,:);
     Upp=CI_temp(2,:);
@@ -186,20 +165,12 @@ for i=1:4
     
     eval(['topVars.case',num2str(i),'=sig_vars(1:noTopVar);'])
 end
-<<<<<<< Updated upstream
-% THis is how we get our top cadidatesusing the bootsrapping approach. 
-=======
 % THis is how we get our top candidatesusing the bootsrapping approach.
->>>>>>> Stashed changes
 varList=[topVars.case1;topVars.case2;topVars.case3;topVars.case4];
 varList=unique(varList);
 
 %% Bonferroni test for all cases
 
-<<<<<<< Updated upstream
-% addpath for find_cell
-addpath(genpath('/Users/tuure/GIT_Folder/FBA_Toolboxes/Utilities'))
-=======
 % Reorder variables according to magnitude in mean difference of case 1&2
 % to help reading of the results
 locVars=find_cell(varList,variables);
@@ -210,7 +181,6 @@ mC2=mean(case2(:,locVars));
 varList=varList(idSortVarlist);
 
 % lovate variables
->>>>>>> Stashed changes
 locVars=find_cell(varList,variables);
 % Perform ttest for each case with bonferroni correction
 alpha=0.05;
@@ -223,33 +193,6 @@ myDiffs=[];
 for pairNum=1:size(pairCases,1)
     tempCI=[];
     tempEst=[];
-<<<<<<< Updated upstream
-   for varNum=1:numel(varList)
-      eval(['tempX=case',num2str(pairCases(pairNum,1)),'(:,locVars(varNum));'])
-      eval(['tempY=case',num2str(pairCases(pairNum,2)),'(:,locVars(varNum));'])
-      [H,P,CI,STATS]=ttest(tempX',tempY','alpha',alpha/ntest);
-      le_string=[varList{varNum},': C',num2str(pairCases(pairNum,1)),'-C',num2str(pairCases(pairNum,2))];
-      estimate=mean(tempX)-mean(tempY);
-      allCases=[allCases;[{le_string},{estimate},{CI(1)},{CI(2)},{P}]];
-      tempCI=[tempCI;CI];
-      tempEst=[tempEst;estimate];
-      myDiffs = [myDiffs tempX-tempY];
-   end
-   subplot(3,2,pairNum)
-   errorbar(1:numel(tempEst),tempEst,tempCI(:,1)-tempEst...
-       ,tempEst-tempCI(:,2),'dk','MarkerFaceColor','k','MarkerSize',8,'LineWidth',1.5);
-   ylabel('Bonferroni CIs')
-   title(['C',num2str(pairCases(pairNum,1)),'-C',num2str(pairCases(pairNum,2))])
-   set(gca,'XTick',1:numel(varList))
-   set(gca,'XTickLabel',varList)
-   set(gca,'XTickLabelRotation',60)
-   hold on
-   plot(xlim,[0 0],'--k')
-   set(gca,'fontsize',22)
-   set(gca,'fontweight','bold')
-   grid on
-   allCIs=[allCIs;tempCI];
-=======
     for varNum=1:numel(varList)
         eval(['tempX=case',num2str(pairCases(pairNum,1)),'(:,locVars(varNum));'])
         eval(['tempY=case',num2str(pairCases(pairNum,2)),'(:,locVars(varNum));'])
@@ -282,7 +225,6 @@ for pairNum=1:size(pairCases,1)
     set(gca,'fontweight','bold')
     grid on
     allCIs=[allCIs;tempCI];
->>>>>>> Stashed changes
 end
 
 % get_CI_bonferroni(myDiffs)
@@ -304,11 +246,7 @@ for caseNo=1:4
     tempSTD=std(tempData);
     vecSTD=[vecSTD,tempSTD];
 end
-<<<<<<< Updated upstream
-Smean=Smat/noSamples; % CHECK THISIS RIGHT n = noSamples
-=======
 Smean=Smat/noSamples;
->>>>>>> Stashed changes
 
 % Generate the covariance matrix for the case comparisons
 pairCases=nchoosek(1:4,2);
@@ -332,13 +270,8 @@ Zsimu = mvnrnd(zeros(ntest,1),Gamma,nsimu);% simulate Z nsimu times DOUBLE CHECK
 absmax = max(abs(Zsimu)'); %compute max_j |Z_j|
 q_alpha=quantile(absmax,1-alpha);
 
-<<<<<<< Updated upstream
-Low = Cont_est - q_alpha*sqrt(diag(Cont_var)); % We don't divide by n here as we did it earlier Smean = Smat/n !!!!!!!!
-Upp = Cont_est + q_alpha*sqrt(diag(Cont_var)); % MAKE SURE TO BE CONSISTENT IN THE WRITING OF TEXT !!!
-=======
 Low = Cont_est - q_alpha*sqrt(diag(Cont_var)); % We don't divide by n here as we did it earlier Smean = Smat/noSamples !!!!!!!!
 Upp = Cont_est + q_alpha*sqrt(diag(Cont_var));
->>>>>>> Stashed changes
 
 figure
 for pairNum=1:size(pairCases,1)
@@ -394,11 +327,7 @@ Boot_est=K*vecMean';
 Boot_SD=sqrt(0.5*abs(K)*[vecSTD.^2]');
 
 % Bootstrap samples
-<<<<<<< Updated upstream
-nR = 500;
-=======
 nR = 25000; % 25000 used in paper
->>>>>>> Stashed changes
 t_stat = zeros(nR,ntest);
 for i = 1:nR
     % Sampling with replacement
