@@ -112,7 +112,6 @@ set(gca,'fontweight','bold')
 
 legend('Univariate','Bonferroni','Exact normal','Bootstrap')
 
-
 %% Case studiy: applying the three statistical methods
 % for constructing CIs when comparing 4 diffferent FDPs.
 % We select top 7 enzymes per case and take the union of these top enzymes for study.
@@ -142,7 +141,7 @@ noTopVar=7;
 tol=10^-9;
 for i=1:4
     % evaluate eache case to get significant variables
-    eval(['index=std(case',num2str(i),')>tol;'])
+    eval(['index=std(case',num2str(i),')>tol;']) % consider ones that present variance larger than tolerance...
     eval(['dat = case',num2str(i),'(:,index);'])
     
     m_vec = mean(dat); % get means
@@ -159,13 +158,14 @@ for i=1:4
     % find significant FCCs
     isSignif=[Upp(m_vec_order)<0 | Low(m_vec_order)>0];
     
+    % update variable names as we remove below tolerance variables
     dat_vars=variables(index);
     sort_vars=dat_vars(m_vec_order);
     sig_vars=sort_vars(isSignif);
     
     eval(['topVars.case',num2str(i),'=sig_vars(1:noTopVar);'])
 end
-% THis is how we get our top candidatesusing the bootsrapping approach.
+% THis is how we get our top candidatesusing the bootsrapping approach. 
 varList=[topVars.case1;topVars.case2;topVars.case3;topVars.case4];
 varList=unique(varList);
 
@@ -184,7 +184,7 @@ varList=varList(idSortVarlist);
 locVars=find_cell(varList,variables);
 % Perform ttest for each case with bonferroni correction
 alpha=0.05;
-pairCases=nchoosek(1:4,2);
+pairCases=nchoosek(1:4,2); % combinations of FDP comparisons
 ntest=size(pairCases,1)*numel(varList);
 allCases=[];
 figure;
@@ -227,13 +227,10 @@ for pairNum=1:size(pairCases,1)
     allCIs=[allCIs;tempCI];
 end
 
-% get_CI_bonferroni(myDiffs)
-% 1.8880e+06 samples for 0.1 EM
-
 %% Normal exact testing
 
 % Get variance matrices and the means and std of the cases
-Smat=zeros(4*numel(locVars));
+Smat=zeros(4*numel(locVars)); %getting the variance matrix
 vecMean=[];
 vecSTD=[];
 for caseNo=1:4
@@ -266,7 +263,7 @@ Cont_var=K*Smean*transpose(K);
 [Gamma,~] = corrcov(Cont_var);
 
 nsimu=noSamples; % number of simulations
-Zsimu = mvnrnd(zeros(ntest,1),Gamma,nsimu);% simulate Z nsimu times DOUBLE CHECK THIS FUCNTION
+Zsimu = mvnrnd(zeros(ntest,1),Gamma,nsimu);% simulate Z nsimu times
 absmax = max(abs(Zsimu)'); %compute max_j |Z_j|
 q_alpha=quantile(absmax,1-alpha);
 
