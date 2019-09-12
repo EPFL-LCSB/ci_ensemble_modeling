@@ -170,7 +170,6 @@ varList=[topVars.case1;topVars.case2;topVars.case3;topVars.case4];
 varList=unique(varList);
 
 %% Bonferroni test for all cases
-
 % Reorder variables according to magnitude in mean difference of case 1&2
 % to help reading of the results
 locVars=find_cell(varList,variables);
