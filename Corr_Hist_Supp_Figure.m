@@ -1,7 +1,7 @@
 load('./rawData/GLCptspp/case1.mat');
 load('Enzymes.mat');
 
-% Create variables name tags and keep 10k samples.
+% Create variables name tags and keep 50k samples.
 variables = Enzymes;
 case1 = samples(:,1:50000)';
 
@@ -50,20 +50,6 @@ end
 % Plot for PFK distribution as example
 idSelected=find(ismember(variables,{'PFK','RPE','TPI'}));
 for i=idSelected'%1:50
-% figure
-% myMean=mean(data(:,i));
-% UB=myMean+std(data(:,i))*3;
-% LB=myMean-std(data(:,i))*3;
-% tempData=data(:,i)';
-% tempData=tempData(tempData<UB);
-% tempData=tempData(tempData>LB);
-% hist(tempData,100)
-% title(['C^{GLCptspp}_{',variables{i},'}']);
-% ylabel('Frequency')
-% set(gca,'fontsize',22)
-% set(gca,'fontweight','bold')
-% grid on
-
 figure
 [density, value] = ksdensity(data(:,i),'Kernel','epanechnikov')
 plot(value,density,'LineWidth',1.5);
