@@ -2,7 +2,7 @@ function CIs = get_CI_exactNormal(data,nsimu,alpha)
 % data = [samples x variables] = [n x p];
 % nsimu = number of simulations using normal distribution with implied
 % variance matrix. If not provided use as many as we have samples.
-% alpha = confidence level. 5% is defaults in stats. 
+% alpha = confidence level. 5% is default.
 
 % REMOVE ZERO STD VARIABLES AS mvnrnd WILL THROW AN ERROR FOR NOT BEING
 % ABLE TO GENERATE POSITIVE SEMI DEFINITE MATRIX
