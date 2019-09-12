@@ -1,6 +1,6 @@
 function CIs = get_CI_t_test(data,alpha)
 % data = [samples x variables] = [n x p];
-% alpha = confidence level. 5% is defaults in stats. 
+% alpha = confidence level. 5% is the default.
 
 if nargin < 2
     alpha=0.05;

@@ -1,7 +1,7 @@
 function CIs = get_CI_bootstrap_tail(data,nsimu,alpha)
 % data = [samples x variables] = [n x p];
 % nsimu = number of bootsrap resamplings. If not provided use as many as we have samples.
-% alpha = confidence level. 5% is defaults in stats. 
+% alpha = confidence level. 5% is default.
 
 if nargin < 3
     alpha=0.05;
@@ -23,16 +23,16 @@ for i = 1:nsimu
     x_star=data(index,:);
     x_star_mean=mean(x_star);
     x_star_std=std(x_star)/sqrt(n);
-    t_stat(i,:)=(x_star_mean-data_mean)./x_star_std; % no abs here
+    t_stat(i,:)=(x_star_mean-data_mean)./x_star_std; 
 end
 
 h_boot=[tiedrank(t_stat)-1]/[nsimu+1];
-h_max=max(abs(h_boot-0.5)'); %take abs here instead
+h_max=max(abs(h_boot-0.5)'); %take absolute here instead
 
 q_alpha=quantile(h_max,1-alpha);
 beta = 1-2*q_alpha;
 % With beta = 0.0004, for nR= 5'000, the bootstrap will only provide
-% 5000*0.0004 (ie 2 points) to estimate u and l. Runt time around several
+% 5000*0.0004 (ie 2 points) to estimate u and l. Run time around several
 % minutes.
 % With beta = 0.00056, for nR= 25'000, the bootstrap provide 25000*0.00055
 % (ie ~14 points) to estimate u and l. Run time roughly 40 min....
