@@ -2,7 +2,7 @@
 % Set the random seed
 RandStream.setGlobalStream(RandStream('mt19937ar','seed',2011));
 
-% load data and model
+% load data and corresponding enyzme name tags
 load('./rawData/GLCptspp/case1.mat');
 load('Enzymes.mat');
 
@@ -22,9 +22,8 @@ case1=case1(:,index);
 % clear variables not required
 clear Enzymes samples
 
+% Initiate varible to collect confidence intervals.
 CIagg=[];
-% traditional "errorbars" showing the quartiles of distribution
-CIagg.oracle = quantile(case1,[.25 .75]);
 
 % Classical univariate confidence intervals (CI) without any correction for
 % simulataneous comparison. 95% confidence level.
@@ -49,14 +48,13 @@ tExact = toc(startExact);
 % "t-statistic" is computed from the provided data to estiamte the CIs via
 % resampling from the data with replacement.
 startBoot = tic;
-CIagg.boot=get_CI_bootstrap_tail(case1,25000); %25000 in paper.
+CIagg.boot=get_CI_bootstrap_tail(case1,25000); 
 tBoot = toc(startBoot);
 
 % data mean
 data_mean = mean(case1);
 
 % Plot some of these CIs
-%plot_CI(data_mean,CIagg.oracle)
 plot_CI(data_mean,CIagg.ttest)
 plot_CI(data_mean,CIagg.bonf)
 plot_CI(data_mean,CIagg.norm)
@@ -89,7 +87,7 @@ set(gca,'fontweight','bold')
 
 legend('Bonferroni','Exact normal','Bootstrap')
 
-% Alternative plot - compare the three methods to the t-test no correction
+% Alternative plot - compare the three methods to the univariate no correction
 figure
 errorbar([1:4:numTops*4],data_mean(top_ID),data_mean(top_ID)-CIagg.ttest(1,top_ID)...
     ,CIagg.ttest(2,top_ID)-data_mean(top_ID),'dm','MarkerFaceColor','m','MarkerSize',8,'LineWidth',1.5);
@@ -116,7 +114,7 @@ legend('Univariate','Bonferroni','Exact normal','Bootstrap')
 % for constructing CIs when comparing 4 diffferent FDPs.
 % We select top 7 enzymes per case and take the union of these top enzymes for study.
 
-% Load the model again to fetch variable names
+% Load the names to fetch variable names
 load('Enzymes.mat');
 
 % Create variables name tags and keep 50k samples.
@@ -134,7 +132,7 @@ case4 = samples(:,1:noSamples)'; % [samples x vars]
 % clear variables not required
 clear Enzymes samples
 
-% Find top variables using the bootstrapping approach. We hfavour this
+% Find top variables using the bootstrapping approach. We favour this
 % method as the distribution of control coefficients are generally not very
 % normal...
 noTopVar=7;
@@ -146,7 +144,7 @@ for i=1:4
     
     m_vec = mean(dat); % get means
     
-    [~,m_vec_order]=sort(abs(m_vec),'descend'); % order abs means
+    [~,m_vec_order]=sort(abs(m_vec),'descend'); % order absolute means
     
     % Could use other methods too but bootsrapping appears to be most
     % adequate for non-normal distributions
@@ -165,7 +163,7 @@ for i=1:4
     
     eval(['topVars.case',num2str(i),'=sig_vars(1:noTopVar);'])
 end
-% THis is how we get our top candidatesusing the bootsrapping approach. 
+% This is how we get our top candidatesusing the bootsrapping approach. 
 varList=[topVars.case1;topVars.case2;topVars.case3;topVars.case4];
 varList=unique(varList);
 
@@ -198,7 +196,7 @@ for pairNum=1:size(pairCases,1)
         [H,P,CI,STATS]=ttest(tempX',tempY','alpha',alpha/ntest); % Note we divide by total number of test we compare overall (6 pairs * 15 vars)
         le_string=[varList{varNum},': C',num2str(pairCases(pairNum,1)),'-C',num2str(pairCases(pairNum,2))]; % Names of comparisons
         estimate=mean(tempX)-mean(tempY); %diff means
-        % Collect data as we loop through the cse comparisons
+        % Collect data as we loop through the case comparisons
         allCases=[allCases;[{le_string},{estimate},{CI(1)},{CI(2)},{P}]];
         tempCI=[tempCI;CI];
         tempEst=[tempEst;estimate];
@@ -266,7 +264,7 @@ Zsimu = mvnrnd(zeros(ntest,1),Gamma,nsimu);% simulate Z nsimu times
 absmax = max(abs(Zsimu)'); %compute max_j |Z_j|
 q_alpha=quantile(absmax,1-alpha);
 
-Low = Cont_est - q_alpha*sqrt(diag(Cont_var)); % We don't divide by n here as we did it earlier Smean = Smat/noSamples !!!!!!!!
+Low = Cont_est - q_alpha*sqrt(diag(Cont_var)); % We don't divide by n here as we did it earlier.
 Upp = Cont_est + q_alpha*sqrt(diag(Cont_var));
 
 figure
@@ -323,7 +321,7 @@ Boot_est=K*vecMean';
 Boot_SD=sqrt(0.5*abs(K)*[vecSTD.^2]');
 
 % Bootstrap samples
-nR = 25000; % 25000 used in paper
+nR = 25000; 
 t_stat = zeros(nR,ntest);
 for i = 1:nR
     % Sampling with replacement
@@ -334,11 +332,11 @@ for i = 1:nR
     
     Samp_est=K*tempDAT_m';
     Samp_SD=sqrt(0.5*abs(K)*tempDAT_std.^2');
-    t_stat(i,:)=(Samp_est-Boot_est)./(Samp_SD/sqrt(noSamples)); % no abs here
+    t_stat(i,:)=(Samp_est-Boot_est)./(Samp_SD/sqrt(noSamples));
 end
 
 h_boot=[tiedrank(t_stat)-1]/[nR+1];
-h_max=max(abs(h_boot-0.5)'); %take abs here instead
+h_max=max(abs(h_boot-0.5)'); %take absolute here 
 
 q_alpha=quantile(h_max,1-alpha);
 beta = 1-2*q_alpha;
@@ -379,7 +377,7 @@ end
 
 %% Univariate test for all cases to show differences
 
-% lovate variables
+% locate variables
 locVars=find_cell(varList,variables);
 % Perform ttest for each case with univariate method
 alpha=0.05;
@@ -427,11 +425,4 @@ for pairNum=1:size(pairCases,1)
     grid on
     allCIs=[allCIs;tempCI];
 end
-
-% h = get(0,'children');
-% for i=1:length(h)
-%   saveas(h(i), ['50k_run_draft' num2str(i)], 'fig');
-%   saveas(h(i), ['50k_run_draft' num2str(i)], 'epsc');
-% end
-
 
